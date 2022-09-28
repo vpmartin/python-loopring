@@ -10,7 +10,7 @@ I am not affiliated with Loopring, use at your own risk.
 
 **Loopring REST API documentation**
 
-![https://docs.loopring.io/en/](https://docs.loopring.io/en/)
+https://docs.loopring.io/en/
 
 This library is currently a work in progress.
 
