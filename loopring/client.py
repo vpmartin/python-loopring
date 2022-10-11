@@ -1,116 +1,132 @@
+import re
+import requests
 
+SIGN_MAX_INPUT = 13
+
+from py_eth_sig_utils import utils as sig_utils
+from py_eth_sig_utils.signing import v_r_s_to_signature
+
+from typing import Optional, Any
+
+from loopring.utils.enums import *
+from loopring.utils.sign.eddsa import *
 
 class BaseClient:
-    # API Mainnet/Testnet base URLs
-    API_MAINNET = 'https://api3.loopring.io/'
-    API_TESTNET_UAT2 = 'https://uat2.loopring.io/'
-    API_TESTNET_UAT3 = 'https://uat3.loopring.io/'
+    def __init__(self, **kwargs):
+        # Defaults to Mainnet if no `base_url` kwarg found
+        self.base_url = kwargs.get('base_url', BaseUrl.MAINNET)
 
-    # Candlestick Intervals
-    KLINE_INTERVAL_1MINUTE = '1min'
-    KLINE_INTERVAL_5MINUTE = '5min'
-    KLINE_INTERVAL_15MINUTE = '15min'
-    KLINE_INTERVAL_30MINUTE = '30min'
-    KLINE_INTERVAL_1HOUR = '1hr'
-    KLINE_INTERVAL_2HOUR = '2hr'
-    KLINE_INTERVAL_4HOUR = '4hr'
-    KLINE_INTERVAL_12HOUR = '12hr'
-    KLINE_INTERVAL_1DAY = '1d'
-    KLINE_INTERVAL_1WEEK = '1w'
+        self.address = kwargs.get('address')
+        self.api_key  = kwargs.get('apiKey')
+        self.public_key_x = kwargs.get('publicX')
+        self.public_key_y = kwargs.get('publicY')
+        self.eddsa_key = kwargs.get('privateKey')
 
-    # Order Types
-    ORDER_TYPE_LIMIT = 'LIMIT'
-    ORDER_TYPE_TAKER_ONLY = 'TAKER_ONLY'
-    ORDER_TYPE_MAKER_ONLY = 'MAKER_ONLY'
-    ORDER_TYPE_AMM = 'AMM'
+        if kwargs.get('ecdsaKey', None) is not None:
+            self.ecdsa_key = int(kwargs.get('ecdsaKey', 16).to_bytes(32, byteorder='big'))
 
-    # Order Channels
-    ORDER_CHANNEL_ORDER_BOOK = 'ORDER_BOOK'
-    ORDER_CHANNEL_AMM_POOL = 'AMM_POOL'
-    ORDER_CHANNEL_MIXED = 'MIXED'
+        print(f'Client initialized on {self.base_url} for {self.address}')
 
-    # Sides
-    SIDE_BUY = 'BUY'
-    SIDE_SELL = 'SELL'
+    def _validate(self, pattern: str, value: Any) -> bool:
+        """
+        Checks if the value given as parameter is allowed by the constants of
+        BaseClient following the regex pattern `pattern`.
 
-    # Order Statuses
-    STATUS_PROCESSING = 'processing'
-    STATUS_PROCESSED = 'processed'
-    STATUS_FAILED = 'failed'
-    STATUS_CANCELLED = 'cancelled'
-    STATUS_CANCELLING = 'cancelling'
-    STATUS_EXPIRED = 'expired'
+        :param pattern: regex pattern
+        :param value: value to check
+        :type pattern: str
+        :type value: Any
+        :return: whether 'value' is allowed
+        :rtype: bool
+        """
+        r = re.compile(pattern)
+        allowed = [getattr(self.__class__, s)
+                   for s in list(filter(r.match, dir(self.__class__)))]
+        return value in allowed
 
-    # Fiat Currency Types
-    FIAT_USD = 'USD'
-    FIAT_CNY = 'CNY'
-    FIAT_JPY = 'JPY'
-    FIAT_EUR = 'EUR'
-    FIAT_GBP = 'GBP'
-    FIAT_HKD = 'HKD'
+    def _sign(self, req: requests.Request) -> requests.Request:
+        """
+        Signs an HTTP request with the correct security level
 
-    # Transaction Fill Types
-    FILL_TYPE_DEX = 'dex'
-    FILL_TYPE_AMM = 'amm'
+        :param req: HTTP request to sign
+        :type req: requests.Request
+        :return: signed request
+        :rtype: requests.Request
+        """
+        req.headers.update({'X-API-KEY': self.api_key})
 
-    # Withdrawal Types
-    WITHDRAWAL_TYPE_FORCE = 'force_withdrawal'
-    WITHDRAWAL_TYPE_OFFCHAIN = 'offchain_withdrawal'
+        sec = req.data.pop('security', Security.NONE)
 
-    # Offchain Request Types
-    OFFCHAIN_REQ_ORDER = '0'
-    OFFCHAIN_REQ_OFFCHAIN_WITHDRAWAL = '1'
-    OFFCHAIN_REQ_UPDATE_ACCOUNT = '2'
-    OFFCHAIN_REQ_TRANSFER = '3'
-    OFFCHAIN_REQ_FAST_OFFCHAIN_WITHDRAWAL = '4'
-    OFFCHAIN_REQ_OPEN_ACCOUNT = '5'
-    OFFCHAIN_REQ_AMM_EXIT = '6'
-    OFFCHAIN_REQ_DEPOSIT = '7'
-    OFFCHAIN_REQ_AMM_JOIN = '8'
-    OFFCHAIN_REQ_NFT_MINT = '9'
-    OFFCHAIN_REQ_NFT_WITHDRAWAL = '10'
-    OFFCHAIN_REQ_NFT_TRANSFER = '11'
-    OFFCHAIN_REQ_DEPLOY_TOKENADDRESS = '13'
-    OFFCHAIN_REQ_TRANSFER_AND_UPDATE_ACCOUNT = '15'
-    OFFCHAIN_REQ_NFT_TRANSFER_AND_UPDATE_ACCOUNT = '19'
+        signature = None
 
-    # NFT Types
-    NFT_TYPE_EIP1155 = '0'
-    NFT_TYPE_EIP712 = '1'
+        if sec == Security.EDDSA_URL:
+            signer = UrlEddsaSignHelper(self.eddsa_key, self.base_url)
+            signature = signer.sign(req)
+        elif sec == Security.ECDSA_URL:
+            signer = UrlEddsaSignHelper(self.eddsa_key, self.base_url)
+            msg = signer.hash(req)
+            v, r, s = sig_utils.ecsign(msg, self.ecdsa_key)
+            signature = "0x" + bytes.hex(v_r_s_to_signature(v, r, s)) + "02"
 
-    # NFT Transfer Statuses
-    NFT_TRANSFER_STATUS_PROCESSING = 'processing'
-    NFT_TRANSFER_STATUS_PROCESSED = 'processed'
-    NFT_TRANSFER_STATUS_FAILED = 'failed'
-    NFT_TRANSFER_STATUS_RECEIVED = 'received'
+        if signature is not None:
+            req.headers.update({'X-API-SIG': signature})
 
-    # NFT Mint Statuses
-    NFT_MINT_STATUS_PROCESSING = 'processing'
-    NFT_MINT_STATUS_PROCESSED = 'processed'
-    NFT_MINT_STATUS_FAILED = 'failed'
-    NFT_MINT_STATUS_RECEIVED = 'received'
+        return req
 
-    # NFT Deposit Statuses
-    NFT_DEPOSIT_STATUS_PROCESSING = 'processing'
-    NFT_DEPOSIT_STATUS_PROCESSED = 'processed'
-    NFT_DEPOSIT_STATUS_FAILED = 'failed'
-    NFT_DEPOSIT_STATUS_RECEIVED = 'received'
 
-    # NFT Withdrawal Statuses
-    NFT_WITHDRAWAL_STATUS_PROCESSING = 'processing'
-    NFT_WITHDRAWAL_STATUS_PROCESSED = 'processed'
-    NFT_WITHDRAWAL_STATUS_FAILED = 'failed'
-    NFT_WITHDRAWAL_STATUS_RECEIVED = 'received'
+    def _make(self, method: str,  endpoint: str, params: list=[],
+              data: dict= {}, security=Security.NONE) -> requests.Request:
+        """
+        Creates a `requests.Request` object to be sent later.
 
-    L2_BLOCK_STATUS_FINALIZED = 'finalized'
-    L2_BLOCK_STATUS_CONFIRMED = 'confirmed'
+        :param method: GET, POST, DELETE, PUT, QUERY
+        :param endpoint: REST API endpoint to request to
+        :param params: GET in-url parameters
+        :param data: POST in-body parameters
+        :param security: security level
+        :type method: str
+        :type endpoint: str
+        :type params: list
+        :type data: dict
+        :type security: Security
+        :return: raw HTTP request that needs to be sent
+        :rtype: requests.Request
+        """
+        data['security'] = security
+        full_url = urllib.parse.urljoin(self.base_url, endpoint)
+        req = requests.Request(
+                method=method, url=full_url, params=params, data=data
+        )
+        req = self._sign(req)
 
-    def __init__(self):
-        print('i am a new client')
-        pass
+        return req
 
-        # EDDSA key stuff
+    def _send(self, req: requests.Request) -> requests.Response:
+        """
+        Prepare a `Request` object in a `PreparedRequest` object, send it to
+        the server, close the session and return the reponse.
 
+        :param req: HTTP request to send
+        :type req: requests.Request
+        :return: response
+        :rtype: requests.Response
+        """
+        pr = req.prepare()
+        s = requests.Session()
+        res = s.send(pr)
+        s.close()
+        return res
+
+    def request(self, method: str,  endpoint: str, params: list=[],
+                data: dict={}, security=Security.NONE) -> dict:
+        req = self._make(method, endpoint, params, data, security)
+        res = self._send(req)
+        return res.json()
+
+
+    ### --- API ENDPOINTS ---
+    def get_server_timestamp(self):
+        return self.request('GET', '/api/v3/timestamp')
 
 class Client(BaseClient):
     pass
