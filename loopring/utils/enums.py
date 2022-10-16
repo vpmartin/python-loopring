@@ -34,6 +34,11 @@ class Side():
     BUY  = 'BUY'
     SELL = 'SELL'
 
+class AccountTransactionStatus():
+    PROCESSING = 'processing'
+    PROCESSED  = 'processed'
+    RECEIVED   = 'received'
+    FAILED     = 'failed'
 
 class OrderStatus():
     PROCESSING = 'processing'
@@ -133,3 +138,6 @@ class Security():
     EDDSA_URL = '2'
     ECDSA_URL = '3'
     ECDSA_EIP = '4'
+    BODY_EDDSA = '5'
+    BODY_ECDSA = '6'
+    BODY_HASH = '7'

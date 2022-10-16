@@ -62,7 +62,7 @@ class UrlEddsaSignHelper(EddsaSignHelper):
 
     def serialize_data(self, request):
         method = request.method
-        url = urllib.parse.quote(self.host + request.path, safe='')
+        url = urllib.parse.quote(request.url, safe='')
         if method in ["GET", "DELETE"]:
             data = urllib.parse.quote("&".join(
                 [f"{k}={urllib.parse.quote(str(v), safe='')}" for k, v in
@@ -70,11 +70,12 @@ class UrlEddsaSignHelper(EddsaSignHelper):
         elif method in ["POST", "PUT"]:
             data = urllib.parse.quote(
                 json.dumps(request.data, separators=(',', ':')), safe='')
+            print(f'data: {data}')
         else:
             raise Exception(f"Unknown request method {method}")
 
         # return "&".join([method, url.replace("http", "https"), data])
-        # print("&".join([method, url, data]))
+        print("&".join([method, url, data]))
         return "&".join([method, url, data])
 
 
@@ -195,11 +196,10 @@ class WithdrawalEddsaSignHelper(EddsaSignHelper):
         ]
 
 
-class MessageHash2EddsaSignHelper(EddsaSignHelper):
+class MessageHashEddsaSignHelper(EddsaSignHelper):
     def __init__(self, private_key):
-        super(MessageHash2EddsaSignHelper, self).__init__(
-            poseidon_params(SNARK_SCALAR_FIELD, 2, 6, 53, b'poseidon', 5,
-                            security_target=128),
+        super(MessageHashEddsaSignHelper, self).__init__(
+            poseidon_params(SNARK_SCALAR_FIELD, 2, 6, 53, b'poseidon', 5, security_target=128),
             private_key
         )
 
@@ -208,8 +208,9 @@ class MessageHash2EddsaSignHelper(EddsaSignHelper):
 
     def serialize_data(self, data):
         if isinstance(data, bytes):
-            return int(data.hex(), 16) % SNARK_SCALAR_FIELD
+            return int(data.hex(), 16) >> 3
         elif isinstance(data, str):
-            return int(data, 16) % SNARK_SCALAR_FIELD
+            return int(data, 16) >> 3
         else:
             raise TypeError("Unknown type " + str(type(data)))
+
