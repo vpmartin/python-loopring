@@ -9,6 +9,9 @@ with open('account.json', 'r') as f:
 
 client = Client(**params, base_url=BaseUrl.MAINNET)
 
-resp = client.get_current_fee(OffchainRequestType.OPEN_ACCOUNT)
+resp = client.submit_order(sell_token='USDC', sell_volume=101,
+                           buy_token='ETH', buy_volume=0.07875,
+                           all_or_none=False, fill_amount_b_or_s=False,
+                           valid_until=1700000000, max_fee_bips=30)
 
 print(f'Request response:\n{json.dumps(resp, indent=4)}')

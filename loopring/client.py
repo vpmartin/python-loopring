@@ -29,12 +29,13 @@ class BaseClient:
 
         self.pairs = None
         self.tokens = None
+        self.token_configs = None
+
+        self.exchange_address = self.get_exchange_configurations()['exchangeAddress']
 
         print(f'Client initialized on {self.base_url} for {self.address}')
 
-        #self.exchange_address = self.get_exchange_configurations()['exchangeAddress']
-
-    def _sign(self, req: requests.Request) -> requests.Request:
+    def _sign(self, req: requests.Request, sec: Security) -> requests.Request:
         """
         Signs an HTTP request with the correct security level
 
@@ -43,14 +44,13 @@ class BaseClient:
         :return: signed request
         :rtype: requests.Request
         """
+        # Add the API Key as a header
         req.headers.update({'X-API-KEY': self.api_key})
 
-        sec = req.data.pop('security', Security.NONE)
-        #req.data = json.dumps(req.data)
-
+        # Compute the right signature given the security level
         signature = None
 
-        if sec == Security.EDDSA_URL:
+        if sec in [Security.EDDSA_URL, Security.BODY_EDDSA]:
             signer = UrlEddsaSignHelper(self.eddsa_key, self.base_url)
             signature = signer.sign(req)
 
@@ -60,7 +60,19 @@ class BaseClient:
             v, r, s = sig_utils.ecsign(msg, self.ecdsa_key)
             signature = "0x" + bytes.hex(v_r_s_to_signature(v, r, s)) + "02"
 
+        if sec == Security.EDDSA_ORDER:
+            signer = OrderEddsaSignHelper(self.eddsa_key)
+            hash = signer.hash(req.data)
+            signature = signer.sign(req.data)
+
+        # Add the signature to the right place, either header or body
         if signature is not None:
+            if sec in [Security.BODY_EDDSA, Security.EDDSA_ORDER]:
+                req.data['eddsaSignature'] = signature
+
+            if sec == Security.EDDSA_ORDER:
+                req.data['hash'] = hash
+
             req.headers.update({'X-API-SIG': signature})
 
         return req
@@ -93,8 +105,7 @@ class BaseClient:
         data.clear()
         data.update(filtered_data)
 
-        # Recover the security level and the full URL
-        data['security'] = security
+        # Get the full URL
         full_url = urllib.parse.urljoin(self.base_url, endpoint)
 
         # Create the Request object
@@ -105,7 +116,7 @@ class BaseClient:
         req.headers.update({'Content-Type': 'application/json'})
 
         # Sign the request with the corresponding signature type
-        req = self._sign(req)
+        req = self._sign(req, security)
 
         return req
 
@@ -155,12 +166,11 @@ class BaseClient:
         """
         Debugging purposes. From https://stackoverflow.com/a/23816211.
         """
-        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
+        print('{}\n{}\r\n{}\r\n\r\n'.format(
             '-----------START-----------',
             req.method + ' ' + req.url,
             '\r\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
-            req.body,
-            ))
+            ) + json.dumps(req.body, indent=4))
         print()
 
     def _format_reponse(self, resp, keys):
@@ -180,6 +190,14 @@ class BaseClient:
     def _init_tokens(self):
         resp = self.get_token_configurations()
         self.tokens = {token['symbol']: token['tokenId'] for token in resp}
+
+    def _init_token_configs(self):
+        self.token_configs = {}
+        for tk_cfg in self.get_token_configurations():
+            # Add an entry with key being the token symbol
+            self.token_configs[tk_cfg['symbol']] = tk_cfg
+            # Add a second entry with key being the token ID
+            self.token_configs[self.token_symbol_to_id(tk_cfg['symbol'])] = tk_cfg
 
     def _validate_pair(self, pair, allow_none=False, allow_multipair=False):
         if pair is None and allow_none:
@@ -255,6 +273,9 @@ class BaseClient:
         if symbol is None:
             return None
 
+        if all([s.isnumeric() for s in symbol.split(',')]):
+            return symbol
+
         all_tokens = symbol.split(',')
         all_token_ids = []
         for token in all_tokens:
@@ -263,6 +284,18 @@ class BaseClient:
 
         tokens = ','.join(all_token_ids)
         return tokens
+
+    def adjust_volume(self, token, vol):
+        if self.token_configs is None:
+            self._init_token_configs()
+
+        dec = self.token_configs[token]['decimals']
+
+        if sum(c.isdigit() for c in str(vol)) < dec:
+            new_vol = float(vol) * (10 ** dec)
+            return f'{new_vol:.{dec}f}'.split('.')[0]
+        else:
+            return str(vol)
 
     ### --- API ENDPOINTS --- ###
 
@@ -288,7 +321,8 @@ class BaseClient:
                             data={'accountId': self.account_id},
                             security=Security.EDDSA_URL)
 
-    def get_next_storage_id(self, sell_token_id, max_next):
+    def get_next_storage_id(self, sell_token_id, max_next: Optional = None):
+        sell_token_id = self.token_symbol_to_id(sell_token_id)
         return self.request('GET', '/api/v3/storageId',
                             params={'accountId': self.account_id,
                                     'sellTokenId': sell_token_id,
@@ -301,20 +335,29 @@ class BaseClient:
 
     def submit_order(self, sell_token, sell_volume, buy_token, buy_volume,
                      all_or_none, fill_amount_b_or_s, valid_until,
-                     max_fee_bips, client_order_id, order_type: Optional = None,
+                     max_fee_bips, client_order_id: Optional = None,
+                     order_type: Optional = None,
                      trade_channel: Optional = None, taker: Optional = None,
                      pool_address: Optional = None, affiliate: Optional = None):
+        sell_token_id = self.token_symbol_to_id(sell_token)
+        buy_token_id = self.token_symbol_to_id(buy_token)
+
+        storage_id = self.get_next_storage_id(sell_token)['orderId']
+
+        buy_volume = self.adjust_volume(buy_token_id, buy_volume)
+        sell_volume = self.adjust_volume(sell_token_id, sell_volume)
+
         return self.request('POST', 'api/v3/order',
                             data={
-                                'exchange': None, # TODO
+                                'exchange': self.exchange_address,
                                 'accountId': self.account_id,
-                                'storageId': None, # TODO,
+                                'storageId': storage_id,
                                 'sellToken': {
-                                    'tokenId': sell_token,
+                                    'tokenId': int(sell_token_id),
                                     'volume': sell_volume
                                 },
                                 'buyToken': {
-                                    'tokenId': buy_token,
+                                    'tokenId': int(buy_token_id),
                                     'volume': buy_volume
                                 },
                                 'allOrNone': all_or_none,
@@ -327,11 +370,20 @@ class BaseClient:
                                 'taker': taker,
                                 'poolAddress': pool_address,
                                 'affiliate': affiliate
-                            })
+                            },
+                            security=Security.EDDSA_ORDER)
 
+    def cancel_order(self, order_hash: Optional = None,
+                     client_order_id: Optional = None):
+        if order_hash is None and client_order_id is None:
+            raise Exception("cancel_order: One of order_hash or client_order_id"
+                            " must be specified for an order to be cancelled.")
 
-    def cancel_order(self):
-        pass
+        return self.request('DELETE', '/api/v3/order',
+                            params={'accountId': self.account_id,
+                                    'orderHash': order_hash,
+                                    'clientOrderId': client_order_id},
+                            security=Security.EDDSA_URL)
 
     def get_multiple_orders(self):
         pass

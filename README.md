@@ -28,7 +28,7 @@ This library is currently a work in progress.
 - AMM (Automated Market Maker)
 - Mint, buy and sell NFTs on Loopring L2
 
-### Implemented REST API Endpoints (22/59)
+### Implemented REST API Endpoints (25/59)
 
 | Status  | Endpoint | Description | Method |
 | ------- | -------- | ----------- | ------ |
@@ -36,9 +36,9 @@ This library is currently a work in progress.
 | `[x]` | `/api/v3/apiKey` | Get user ApiKey | GET |
 | `[x]` | `/api/v3/apiKey` | Update user's ApiKey | POST |
 | `[x]` | `/api/v3/storageId` | Get next storage ID | GET |
-| `[ ]` | `/api/v3/order` | Get order details | GET |
-| `[ ]` | `/api/v3/order` | Submit an order | POST |
-| `[ ]` | `/api/v3/order` | Cancel an order | DELETE |
+| `[x]` | `/api/v3/order` | Get order details | GET |
+| `[x]` | `/api/v3/order` | Submit an order | POST |
+| `[x]` | `/api/v3/order` | Cancel an order | DELETE |
 | `[ ]` | `/api/v3/orders` | Get multiple orders | GET |
 | `[x]` | `/api/v3/exchange/markets` | Get market configurations | GET |
 | `[x]` | `/api/v3/exchange/tokens` | Get token configurations | GET |
@@ -89,8 +89,8 @@ This library is currently a work in progress.
 | `[ ]` | `/api/v3/usesr/nft/withdrawals` | Get user's NFT withdrawal history | GET |
 | `[ ]` | `/api/v3/user/nft/offchainFee` | Query current NFT requests fee amount | GET |
 | `[ ]` | `/api/v3/user/nft/orderFee` | Query user's place order fee rate | GET |
-| `[ ]` | `/api/v3/block/getBlock` | Get L2 block info | GET |
-| `[ ]` | `/api/v3/block/getPendingRequests` | Get pending transactions | GET |
+| `[x]` | `/api/v3/block/getBlock` | Get L2 block info | GET |
+| `[x]` | `/api/v3/block/getPendingRequests` | Get pending transactions | GET |
 
 ### Implemented WebSocket API Endpoints (0/8)
 

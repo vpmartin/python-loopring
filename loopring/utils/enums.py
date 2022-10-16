@@ -1,10 +1,10 @@
-class BaseUrl():
+class BaseUrl:
     MAINNET      = 'https://api3.loopring.io/'
     TESTNET_UAT2 = 'https://uat2.loopring.io/'
     TESTNET_UAT3 = 'https://uat3.loopring.io/'
 
 
-class KlineInterval():
+class KlineInterval:
     INT_1MINUTE  = '1min'
     INT_5MINUTE  = '5min'
     INT_15MINUTE = '15min'
@@ -17,30 +17,30 @@ class KlineInterval():
     INT_1WEEK    = '1w'
 
 
-class OrderType():
+class OrderType:
     LIMIT      = 'LIMIT'
     TAKER_ONLY = 'TAKER_ONLY'
     MAKER_ONLY = 'MAKER_ONLY'
     AMM        = 'AMM'
 
 
-class OrderChannel():
+class OrderChannel:
     ORDER_BOOK = 'ORDER_BOOK'
     AMM_POOL   = 'AMM_POOL'
     MIXED      = 'MIXED'
 
 
-class Side():
+class Side:
     BUY  = 'BUY'
     SELL = 'SELL'
 
-class AccountTransactionStatus():
+class AccountTransactionStatus:
     PROCESSING = 'processing'
     PROCESSED  = 'processed'
     RECEIVED   = 'received'
     FAILED     = 'failed'
 
-class OrderStatus():
+class OrderStatus:
     PROCESSING = 'processing'
     PROCESSED = 'processed'
     FAILED = 'failed'
@@ -49,7 +49,7 @@ class OrderStatus():
     EXPIRED = 'expired'
 
 
-class Fiat():
+class Fiat:
     USD = 'USD'
     CNY = 'CNY'
     JPY = 'JPY'
@@ -58,17 +58,17 @@ class Fiat():
     HKD = 'HKD'
 
 
-class FillType():
+class FillType:
     DEX = 'dex'
     AMM = 'amm'
 
 
-class WithdrawalType():
+class WithdrawalType:
     FORCE = 'force_withdrawal'
     OFFCHAIN = 'offchain_withdrawal'
 
 
-class OffchainRequestType():
+class OffchainRequestType:
     ORDER                       = '0'
     OFFCHAIN_WITHDRAWAL         = '1'
     UPDATE_ACCOUNT              = '2'
@@ -88,56 +88,60 @@ class OffchainRequestType():
     NFT_TRANSFER_AND_UPDATE_ACCOUNT = '19'
 
 
-class NftType():
+class NftType:
     EIP1155 = '0'
     EIP712  = '1'
 
 
-class NftTransferStatus():
+class NftTransferStatus:
     PROCESSING = 'processing'
     PROCESSED  = 'processed'
     FAILED     = 'failed'
     RECEIVED   = 'received'
 
 
-class NftMintStatus():
+class NftMintStatus:
     PROCESSING = 'processing'
     PROCESSED  = 'processed'
     FAILED     = 'failed'
     RECEIVED   = 'received'
 
 
-class NftDepositStatus():
+class NftDepositStatus:
     PROCESSING = 'processing'
     PROCESSED  = 'processed'
     FAILED     = 'failed'
     RECEIVED   = 'received'
 
 
-class NftWithdrawalStatus():
+class NftWithdrawalStatus:
     PROCESSING = 'processing'
     PROCESSED  = 'processed'
     FAILED     = 'failed'
     RECEIVED   = 'received'
 
 
-class L2BlockStatus():
+class L2BlockStatus:
     FINALIZED = 'finalized'
     CONFIRMED = 'confirmed'
 
 
-class SignatureType():
+class SignatureType:
     ECDSA = '0'
     EDDSA = '1'
     APPROVED_HASH = '2'
 
 
-class Security():
-    NONE      = '0'
-    API_KEY   = '1'
-    EDDSA_URL = '2'
-    ECDSA_URL = '3'
-    ECDSA_EIP = '4'
-    BODY_EDDSA = '5'
-    BODY_ECDSA = '6'
-    BODY_HASH = '7'
+class Security:
+    NONE        = 'NONE'
+    API_KEY     = 'API_KEY'
+    
+    EDDSA_URL   = 'EDDSA_URL'
+    EDDSA_ORDER = 'EDDSA_ORDER'
+    
+    ECDSA_URL   = 'ECDSA_URL'
+    ECDSA_EIP   = 'ECDSA_EIP'
+    
+    BODY_EDDSA  = 'BODY_EDDSA'
+    BODY_ECDSA  = 'BODY_ECDSA'
+    BODY_HASH   = 'BODY_HASH'
