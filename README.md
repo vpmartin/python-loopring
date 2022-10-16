@@ -28,39 +28,39 @@ This library is currently a work in progress.
 - AMM (Automated Market Maker)
 - Mint, buy and sell NFTs on Loopring L2
 
-### Implemented REST API Endpoints (0/59)
+### Implemented REST API Endpoints (22/59)
 
 | Status  | Endpoint | Description | Method |
 | ------- | -------- | ----------- | ------ |
-| `[ ]` | `/api/v3/timestamp` | Get relayer's current time | GET |
-| `[ ]` | `/api/v3/apiKey` | Get user ApiKey | GET |
-| `[ ]` | `/api/v3/apiKey` | Update user's ApiKey | POST |
-| `[ ]` | `/api/v3/storageId` | Get next storage ID | GET |
+| `[x]` | `/api/v3/timestamp` | Get relayer's current time | GET |
+| `[x]` | `/api/v3/apiKey` | Get user ApiKey | GET |
+| `[x]` | `/api/v3/apiKey` | Update user's ApiKey | POST |
+| `[x]` | `/api/v3/storageId` | Get next storage ID | GET |
 | `[ ]` | `/api/v3/order` | Get order details | GET |
 | `[ ]` | `/api/v3/order` | Submit an order | POST |
 | `[ ]` | `/api/v3/order` | Cancel an order | DELETE |
 | `[ ]` | `/api/v3/orders` | Get multiple orders | GET |
-| `[ ]` | `/api/v3/exchange/markets` | Get market configurations | GET |
-| `[ ]` | `/api/v3/exchange/tokens` | Get token configurations | GET |
-| `[ ]` | `/api/v3/exchange/info` | Get exchange configurations | GET |
-| `[ ]` | `/api/v3/depth` | Get market orderbook | GET |
-| `[ ]` | `/api/v3/ticker` | Get market ticker | GET |
-| `[ ]` | `/api/v3/candlestick` | Get market candlestick | GET |
-| `[ ]` | `/api/v3/price` | Get token fiat prices | GET |
-| `[ ]` | `/api/v3/trade` | Get market recent trades | GET |
+| `[x]` | `/api/v3/exchange/markets` | Get market configurations | GET |
+| `[x]` | `/api/v3/exchange/tokens` | Get token configurations | GET |
+| `[x]` | `/api/v3/exchange/info` | Get exchange configurations | GET |
+| `[x]` | `/api/v3/depth` | Get market orderbook | GET |
+| `[x]` | `/api/v3/ticker` | Get market ticker | GET |
+| `[x]` | `/api/v3/candlestick` | Get market candlestick | GET |
+| `[x]` | `/api/v3/price` | Get token fiat prices | GET |
+| `[x]` | `/api/v3/trade` | Get market recent trades | GET |
 | `[ ]` | `/api/v3/transfer` | Submit internal transfer | POST |
-| `[ ]` | `/api/v3/account` | Query user information | GET |
+| `[x]` | `/api/v3/account` | Query user information | GET |
 | `[ ]` | `/api/v3/account` | Update account EDDSA key | POST |
-| `[ ]` | `/api/v3/user/createInfo` | Get user registration transactions | GET |
-| `[ ]` | `/api/v3/user/updateInfo` | Get password reset transactions | GET |
-| `[ ]` | `/api/v3/user/balances` | Get user exchange balances | GET |
-| `[ ]` | `/api/v3/user/deposits` | Get user deposit history | GET |
-| `[ ]` | `/api/v3/user/withdrawals` | Get user onchain withdrawal history | GET |
-| `[ ]` | `/api/v3/user/withdrawals` | Submit offchain withdrawal request | GET |
-| `[ ]` | `/api/v3/user/transfers` | Get user transfer list | GET |
-| `[ ]` | `/api/v3/user/trades` | Get user trade history | GET |
-| `[ ]` | `/api/v3/user/orderFee` | Query user place order fee rate | GET |
-| `[ ]` | `/api/v3/user/orderUserRateAmount` | Query current token minimum amount to place order based on user's VIP level and max fee bips | GET |
+| `[x]` | `/api/v3/user/createInfo` | Get user registration transactions | GET |
+| `[x]` | `/api/v3/user/updateInfo` | Get password reset transactions | GET |
+| `[x]` | `/api/v3/user/balances` | Get user exchange balances | GET |
+| `[t]` | `/api/v3/user/deposits` | Get user deposit history | GET |
+| `[t]` | `/api/v3/user/withdrawals` | Get user onchain withdrawal history | GET |
+| `[ ]` | `/api/v3/user/withdrawals` | Submit offchain withdrawal request | POST |
+| `[x]` | `/api/v3/user/transfers` | Get user transfer list | GET |
+| `[x]` | `/api/v3/user/trades` | Get user trade history | GET |
+| `[x]` | `/api/v3/user/orderFee` | Query user place order fee rate | GET |
+| `[x]` | `/api/v3/user/orderUserRateAmount` | Query current token minimum amount to place order based on user's VIP level and max fee bips | GET |
 | `[ ]` | `/api/v3/user/offchainFee` | Query current fee amount | GET |
 | `[ ]` | `/api/v3/amm/pools` | Get AMM pool configurations | GET |
 | `[ ]` | `/api/v3/amm/balance` | Get AMM pool balance snapshot | GET |
