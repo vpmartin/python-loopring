@@ -88,6 +88,10 @@ class OffchainRequestType:
     NFT_TRANSFER_AND_UPDATE_ACCOUNT = '19'
 
 
+class AmmTransactionType:
+    JOIN = 'join'
+    EXIT = 'exit'
+
 class NftType:
     EIP1155 = '0'
     EIP712  = '1'
@@ -125,6 +129,20 @@ class L2BlockStatus:
     FINALIZED = 'finalized'
     CONFIRMED = 'confirmed'
 
+
+class L2TransactionType:
+    NOOP                   = 'Noop'
+    DEPOSIT                = 'Deposit'
+    WITHDRAW               = 'Withdraw'
+    TRANSFER               = 'Transfer'
+    SPOT_TRADE             = 'SpotTrade'
+    ACCOUNT_UPDATE         = 'AccountUpdate'
+    AMM_UPDATE             = 'AmmUpdate'
+    JOIN_AMM               = 'JoinAmm'
+    EXIT_AMM               = 'ExitAmm'
+    SIGNATURE_VERIFICATION = 'SignatureVerification'
+    NFT_MINT               = 'NftMint'
+    NFT_DATA               = 'NftData'
 
 class SignatureType:
     ECDSA = '0'

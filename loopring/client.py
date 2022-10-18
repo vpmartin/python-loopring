@@ -237,8 +237,10 @@ class BaseClient:
 
         if type(value) == str:
             all_values = value.split(',')
+        elif type(value) != list:
+                all_values = [value]
         else:
-            all_values = list(value)
+            all_values = value
 
         if not allow_multiple and len(all_values) > 1:
             raise MultipleNotAllowedException(cls, value)
@@ -300,11 +302,54 @@ class BaseClient:
     ### --- API ENDPOINTS --- ###
 
     # -- Loopring Utilities --
-    def get_l2_block_info(self):
-        pass
+    def get_l2_block_info(self, block_id):
+        try:
+            self._validate_enum(L2BlockStatus, block_id)
+        except InvalidEnumException:
+            if str(block_id).isnumeric():
+                pass
 
-    def get_pending_txs(self):
-        pass
+        return self.request('GET', '/api/v3/block/getBlock',
+                            params={'id': block_id})
+
+    def get_pending_txs(self, tx_type, account_id: Optional = None,
+                        owner: Optional = None, token: Optional = None,
+                        to_token: Optional = None, fee: Optional = None,
+                        valid_until: Optional = None,
+                        to_account_id: Optional = None,
+                        to_account_address: Optional = None,
+                        storage_id: Optional = None,
+                        orderA: Optional = None, orderB: Optional = None,
+                        valid: Optional = None, nonce: Optional = None,
+                        minter_account_id: Optional = None,
+                        minter: Optional = None, nft_token: Optional = None,
+                        nft_type: Optional = None,
+                        from_address: Optional = None,
+                        to_address: Optional = None):
+        self._validate_enum(L2TransactionType, tx_type)
+
+        return self.request('GET', '/api/v3/block/getPendingRequests',
+                            params={'txType': tx_type,
+                                    'accountId': account_id,
+                                    'owner': owner,
+                                    'token': token,
+                                    'toToken': to_token,
+                                    'fee': fee,
+                                    'validUntil': valid_until,
+                                    'toAccountId': to_account_id,
+                                    'toAccountAddress': to_account_address,
+                                    'storageId': storage_id,
+                                    'orderA': orderA,
+                                    'orderB': orderB,
+                                    'valid': valid,
+                                    'nonce': nonce,
+                                    'minterAccountId': minter_account_id,
+                                    'minter': minter,
+                                    'nftToken': nft_token,
+                                    'nftType': nft_type,
+                                    'fromAddress': from_address,
+                                    'toAddress': to_address,
+                                    })
 
     def get_server_timestamp(self):
         return self.request('GET', '/api/v3/timestamp')
@@ -609,10 +654,11 @@ class BaseClient:
     # --- AMM Pool Endpoints ---
 
     def get_amm_pool_configurations(self):
-        pass
+        return self.request('GET', '/api/v3/amm/pools')
 
-    def get_amm_pool_balance_snapshot(self):
-        pass
+    def get_amm_pool_balance_snapshot(self, pool_address):
+        return self.request('GET', '/api/v3/amm/balance',
+                            params={'poolAddress': pool_address})
 
     def join_amm_pool(self):
         pass
@@ -620,11 +666,25 @@ class BaseClient:
     def exit_amm_pool(self):
         pass
 
-    def get_amm_join_exit_txs(self):
-        pass
+    def get_amm_join_exit_txs(self, start: Optional = None, end: Optional = None,
+                             status: Optional = None, limit: Optional = None,
+                             offset: Optional = None, tx_types: Optional = None,
+                             tx_status: Optional = None,
+                              amm_pool_address: Optional = None):
+        self._validate_enum(AmmTransactionType, tx_types, allow_none=True)
 
-    def get_amm_pool_trade_txs(self):
-        pass
+        return self.request('GET', '/api/v3/amm/user/transactions',
+                            params={'accountId': self.account_id,
+                                    'start': start, 'end': end,
+                                    'limit': limit, 'offset': offset,
+                                    'txTypes': tx_types, 'txStatus': tx_status,
+                                    'ammPoolAddress': amm_pool_address})
+
+    def get_amm_pool_trade_txs(self, amm_pool_address, limit: Optional = None,
+                               offset: Optional = None):
+        return self.request('GET', '/api/v3/amm/trades',
+                            params={'ammPoolAddress': amm_pool_address,
+                                    'limit': limit, 'offset': offset})
 
     # --- NFT Endpoints ---
 

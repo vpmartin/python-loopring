@@ -62,12 +62,12 @@ This library is currently a work in progress.
 | `[x]` | `/api/v3/user/orderFee` | Query user place order fee rate | GET |
 | `[x]` | `/api/v3/user/orderUserRateAmount` | Query current token minimum amount to place order based on user's VIP level and max fee bips | GET |
 | `[ ]` | `/api/v3/user/offchainFee` | Query current fee amount | GET |
-| `[ ]` | `/api/v3/amm/pools` | Get AMM pool configurations | GET |
-| `[ ]` | `/api/v3/amm/balance` | Get AMM pool balance snapshot | GET |
-| `[ ]` | `/api/v3/amm/join` | Join AMM pool | POST |
+| `[x]` | `/api/v3/amm/pools` | Get AMM pool configurations | GET |
+| `[x]` | `/api/v3/amm/balance` | Get AMM pool balance snapshot | GET |
+| `[x]` | `/api/v3/amm/join` | Join AMM pool | POST |
 | `[ ]` | `/api/v3/amm/exit` | Exit AMM pool | POST |
-| `[ ]` | `/api/v3/amm/transactions` | Return the user's AMM join/exit transactions | GET |
-| `[ ]` | `/api/v3/amm/trades` | Get AMM pool trade transactions | GET |
+| `[x]` | `/api/v3/amm/transactions` | Return the user's AMM join/exit transactions | GET |
+| `[x]` | `/api/v3/amm/trades` | Get AMM pool trade transactions | GET |
 | `[ ]` | `/api/v3/mix/depth` | api.getMixedDepth.value | GET |
 | `[ ]` | `/api/v3/mix/ticker` | api.getMixedTicker.value | GET |
 | `[ ]` | `/api/v3/mix/candlestick` | api.getMixedCandlestick.value | GET |
