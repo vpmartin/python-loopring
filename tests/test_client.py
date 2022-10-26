@@ -9,7 +9,7 @@ with open('account.json', 'r') as f:
 
 client = Client(**params, base_url=BaseUrl.MAINNET)
 
-resp = client.get_nft_order_minimum_amount('0x14c9909135bc3ca8761cdbc7f8926a8b0de7de49a2dc32eac540cee21144cdd0')
+resp = client.get_mix_markets()
 
 # "nftData": "0x14c9909135bc3ca8761cdbc7f8926a8b0de7de49a2dc32eac540cee21144cdd0",
 # "tokenAddress": "0x9d226054324360d8eeb024f66731d6c5e44e8c6f",

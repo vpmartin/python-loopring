@@ -708,6 +708,49 @@ class BaseClient:
                             params={'ammPoolAddress': amm_pool_address,
                                     'limit': limit, 'offset': offset})
 
+    # --- 'Mixed' Endpoints ---
+
+    def get_mix_orderbook(self, pair, level, limit=50):
+        self._validate_pair(pair)
+
+        return self.request('GET', '/api/v3/mix/depth',
+                            params={'market': pair, 'level': level,
+                                    'limit': limit})
+
+    def get_mix_ticker(self, pair):
+        self._validate_pair(pair, allow_multipair=True)
+
+        resp = self.request('GET', '/api/v3/mix/ticker',
+                            params={'market': pair})
+
+        return self._format_reponse(resp['tickers'],
+                                    keys=['tradingPair', 'timestamp',
+                                          'baseVolume', 'quoteVolume',
+                                          'open', 'high', 'low', 'close',
+                                          'trades',
+                                          'highestBid', 'lowestAsk',
+                                          'baseFee', 'quoteFee'])
+
+    def get_mix_candlestick(self, pair, interval, start: Optional = None,
+                               end: Optional = None, limit: Optional = None):
+        self._validate_pair(pair)
+        self._validate_enum(KlineInterval, interval)
+
+        resp = self.request('GET', '/api/v3/mix/candlestick',
+                            params={'market': pair, 'interval': interval,
+                                    'start': start, 'end': end,
+                                    'limit': limit})
+
+        resp['candlesticks'] =  self._format_reponse(resp['candlesticks'],
+                                            keys=['timestamp', 'trades',
+                                                  'open', 'close', 'high',
+                                                  'low', 'baseVolume',
+                                                  'quoteVolume'])
+        return resp
+
+    def get_mix_markets(self):
+        return self.request('GET', '/api/v3/mix/markets')
+
     # --- NFT Endpoints ---
 
     def mint_nft(self):

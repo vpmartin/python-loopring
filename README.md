@@ -28,7 +28,7 @@ This library is currently a work in progress.
 - AMM (Automated Market Maker)
 - Mint, buy and sell NFTs on Loopring L2
 
-### Implemented REST API Endpoints (45/59)
+### Implemented REST API Endpoints (48/59)
 
 | Status  | Endpoint | Description | Method |
 | ------- | -------- | ----------- | ------ |
@@ -68,10 +68,10 @@ This library is currently a work in progress.
 | `[ ]` | `/api/v3/amm/exit` | Exit AMM pool | POST |
 | `[x]` | `/api/v3/amm/transactions` | Return the user's AMM join/exit transactions | GET |
 | `[x]` | `/api/v3/amm/trades` | Get AMM pool trade transactions | GET |
-| `[ ]` | `/api/v3/mix/depth` | api.getMixedDepth.value | GET |
-| `[ ]` | `/api/v3/mix/ticker` | api.getMixedTicker.value | GET |
-| `[ ]` | `/api/v3/mix/candlestick` | api.getMixedCandlestick.value | GET |
-| `[ ]` | `/api/v3/mix/markets` | api.getMixedMarkets.value | GET |
+| `[x]` | `/api/v3/mix/depth` | api.getMixedDepth.value | GET |
+| `[x]` | `/api/v3/mix/ticker` | api.getMixedTicker.value | GET |
+| `[x]` | `/api/v3/mix/candlestick` | api.getMixedCandlestick.value | GET |
+| `[x]` | `/api/v3/mix/markets` | api.getMixedMarkets.value | GET |
 | `[ ]` | `/api/v3/nft/mint` | Mint a NFT token on Loopring L2 | POST |
 | `[ ]` | `/api/v3/nft/transfer` | Submit internal NFT transfer | POST |
 | `[ ]` | `/api/v3/nft/validateOrder` | Validate a NFT order | POST |
