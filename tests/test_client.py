@@ -9,13 +9,10 @@ with open('account.json', 'r') as f:
 
 client = Client(**params, base_url=BaseUrl.MAINNET)
 
-"""
-resp = client.submit_order(sell_token='USDC', sell_volume=101,
-                           buy_token='ETH', buy_volume=0.07875,
-                           all_or_none=False, fill_amount_b_or_s=False,
-                           valid_until=1700000000, max_fee_bips=30)
-"""
+resp = client.get_nft_order_minimum_amount('0x14c9909135bc3ca8761cdbc7f8926a8b0de7de49a2dc32eac540cee21144cdd0')
 
-resp = client.get_l2_block_info(31131)
+# "nftData": "0x14c9909135bc3ca8761cdbc7f8926a8b0de7de49a2dc32eac540cee21144cdd0",
+# "tokenAddress": "0x9d226054324360d8eeb024f66731d6c5e44e8c6f",
+#minter": "0x8d0b24f4c4eb9b0b450cfce37e1b842d3005c1d8",
 
 print(f'Request response:\n{json.dumps(resp, indent=4)}')

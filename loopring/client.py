@@ -430,8 +430,30 @@ class BaseClient:
                                     'clientOrderId': client_order_id},
                             security=Security.EDDSA_URL)
 
-    def get_multiple_orders(self):
-        pass
+    def get_multiple_orders(self, pair: Optional = None,
+                            start: Optional = None, end: Optional = None,
+                            side: Optional = None, status: Optional = None,
+                            limit: Optional = None, offset: Optional = None,
+                            order_types: Optional = None,
+                            trade_channels: Optional = None):
+        self._validate_pair(pair, allow_none=True)
+        self._validate_enum(Side, side, allow_none=True,
+                            allow_multiple=True)
+        self._validate_enum(OrderStatus, status, allow_none=True,
+                            allow_multiple=True)
+        self._validate_enum(OrderType, order_types, allow_none=True,
+                            allow_multiple=True)
+        self._validate_enum(OrderChannel, trade_channels, allow_none=True,
+                            allow_multiple=True)
+
+        return self.request('GET', '/api/v3/orders',
+                            params={'accountId': self.account_id,
+                                    'market': pair,
+                                    'start': start, 'end': end,
+                                    'status': status, 'limit': limit,
+                                    'offset': offset,
+                                    'orderTypes': order_types,
+                                    'tradeChannels': trade_channels})
 
     def get_market_configurations(self):
         return self.request('GET', '/api/v3/exchange/markets')
@@ -703,41 +725,144 @@ class BaseClient:
     def withdraw_nft(self):
         pass
 
-    def get_nft_info1(self):
-        pass
+    def get_nft_info(self, nft_datas: Optional = None, minter: Optional = None,
+                     token_address: Optional = None, nft_id: Optional = None):
+        if nft_datas is None and (minter is None or token_address is None or
+        nft_id is None):
+            raise Exception('One of either (nft_datas) or (minter, '
+                             'token_address, nft_id) must be specified.')
 
-    def get_nft_info2(self):
-        pass
+        elif nft_datas is None:
+            return self.request('GET', '/api/v3/nft/info/nftData',
+                                params={'minter': minter,
+                                        'tokenAddress': token_address,
+                                        'nftId': nft_id})
 
-    def get_nft_holders(self):
-        pass
+        elif minter is None or token_address is None or nft_id is None:
+            return self.request('GET', '/api/v3/nft/info/nfts',
+                                params={'nftDatas': nft_datas})
 
-    def get_nft_order_minimum_amount(self):
-        pass
+        else:
+            raise Exception('One of either (nft_datas) or (minter, '
+                             'token_address, nft_id) must be specified, not '
+                             'both at the same time.')
 
-    def get_nft_balance(self):
-        pass
+    def get_nft_holders(self, nft_datas, offset: Optional = None,
+                        limit: Optional = None):
+        return self.request('GET', '/api/v3/nft/info/nftHolders',
+                            params={'nftData': nft_datas,
+                                    'offset': offset,
+                                    'limit': limit})
 
-    def get_nft_trade_history(self):
-        pass
+    def get_nft_order_minimum_amount(self, nft_token_address,
+                                     fee_token_symbol: Optional = None):
+        self._validate_symbol(fee_token_symbol, allow_none=True)
 
-    def get_nft_transfer_history(self):
-        pass
+        return self.request('GET', '/api/v3/nft/info/orderUserRateAmount',
+                            params={'accountId': self.account_id,
+                                    'nftTokenAddress': nft_token_address,
+                                    'feeTokenSymbol': fee_token_symbol})
 
-    def get_nft_mint_history(self):
-        pass
+    def get_nft_balance(self, nft_datas: Optional = None,
+                        token_address: Optional = None,
+                        token_ids: Optional = None, offset: Optional = None,
+                        limit: Optional = None, non_zero: Optional = None):
+        return self.request('GET', '/api/v3/user/nft/balances',
+                            params={'accountId': self.account_id,
+                                    'nftDatas': nft_datas,
+                                    'tokenAddrs': token_address,
+                                    'tokenIds': token_ids, 'offset': offset,
+                                    'limit': limit, 'nonZero': non_zero})
 
-    def get_nft_deposit_history(self):
-        pass
+    def get_nft_trade_history(self, nft_data: Optional = None,
+                              order_hash: Optional = None,
+                              start: Optional = None, end: Optional = None,
+                              start_id: Optional = None,
+                              limit: Optional = None):
+        return self.request('GET', '/api/v3/user/nft/trades',
+                            params={'accountId': self.account_id,
+                                    'nftData': nft_data,
+                                    'orderHash': order_hash,
+                                    'start': start, 'end': end,
+                                    'startId': start_id, 'limit': limit})
 
-    def get_nft_withdrawal_history(self):
-        pass
+    def get_nft_transfer_history(self, nft_data: Optional = None,
+                                 start: Optional = None, end: Optional = None,
+                                 start_id: Optional = None,
+                                 limit: Optional = None,
+                                 tx_status: Optional = None,
+                                 hashes: Optional = None):
+        self._validate_enum(NftTransferStatus, tx_status, allow_none=True)
 
-    def get_nft_fee(self):
-        pass
+        return self.request('GET', '/api/v3/user/nft/transfers',
+                            params={'accountId': self.account_id,
+                                    'nftData': nft_data, 'start': start,
+                                    'end': end, 'startId': start_id,
+                                    'limit': limit, 'txStatus': tx_status,
+                                    'hashes': hashes})
 
-    def get_nft_order_placing_fee(self):
-        pass
+    def get_nft_mint_history(self, nft_data: Optional = None,
+                                 start: Optional = None, end: Optional = None,
+                                 start_id: Optional = None,
+                                 limit: Optional = None,
+                                 tx_status: Optional = None,
+                                 hashes: Optional = None):
+        self._validate_enum(NftMintStatus, tx_status, allow_none=True)
+
+        return self.request('GET', '/api/v3/user/nft/mints',
+                            params={'accountId': self.account_id,
+                                    'nftData': nft_data, 'start': start,
+                                    'end': end, 'startId': start_id,
+                                    'limit': limit, 'txStatus': tx_status,
+                                    'hashes': hashes})
+
+    def get_nft_deposit_history(self, nft_data: Optional = None,
+                                 start: Optional = None, end: Optional = None,
+                                 start_id: Optional = None,
+                                 limit: Optional = None,
+                                 tx_status: Optional = None,
+                                 hashes: Optional = None):
+        self._validate_enum(NftDepositStatus, tx_status, allow_none=True)
+
+        return self.request('GET', '/api/v3/user/nft/deposits',
+                            params={'accountId': self.account_id,
+                                    'nftData': nft_data, 'start': start,
+                                    'end': end, 'startId': start_id,
+                                    'limit': limit, 'txStatus': tx_status,
+                                    'hashes': hashes})
+
+    def get_nft_withdrawal_history(self, nft_data: Optional = None,
+                                 start: Optional = None, end: Optional = None,
+                                 start_id: Optional = None,
+                                 limit: Optional = None,
+                                 tx_status: Optional = None,
+                                 hashes: Optional = None):
+        self._validate_enum(NftWithdrawalStatus, tx_status, allow_none=True)
+
+        return self.request('GET', '/api/v3/user/nft/withdrawals',
+                            params={'accountId': self.account_id,
+                                    'nftData': nft_data, 'start': start,
+                                    'end': end, 'startId': start_id,
+                                    'limit': limit, 'txStatus': tx_status,
+                                    'hashes': hashes})
+
+    def get_nft_fee(self, request_type, token_address: Optional = None,
+                    amount: Optional = None):
+        self._validate_enum(OffchainNftRequestType, request_type)
+
+        return self.request('GET', '/api/v3/user/nft/offchainFee',
+                            params={'accountId': self.account_id,
+                                    'requestType': request_type,
+                                    'amount': amount})
+
+    def get_nft_order_placing_fee(self, nft_token_address, quote_token,
+                                  quote_amount):
+        quote_token = self.token_symbol_to_id(quote_token)
+        return self.request('GET', '/api/v3/user/nft/orderFee',
+                            params={'accountId': self.account_id,
+                                    'nftTokenAddress': nft_token_address,
+                                    'quoteToken': quote_token,
+                                    'quoteAmount': quote_amount})
 
 
 class Client(BaseClient):

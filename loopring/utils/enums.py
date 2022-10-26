@@ -80,7 +80,8 @@ class OffchainRequestType:
     AMM_JOIN                    = '8'
     TRANSFER_AND_UPDATE_ACCOUNT = '15'
 
-    # NFT-specific Request Types
+
+class OffchainNftRequestType:
     NFT_MINT                        = '9'
     NFT_WITHDRAWAL                  = '10'
     NFT_TRANSFER                    = '11'
