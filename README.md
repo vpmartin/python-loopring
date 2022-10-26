@@ -28,7 +28,7 @@ This library is currently a work in progress.
 - AMM (Automated Market Maker)
 - Mint, buy and sell NFTs on Loopring L2
 
-### Implemented REST API Endpoints (48/59)
+### Implemented REST API Endpoints (49/59)
 
 | Status  | Endpoint | Description | Method |
 | ------- | -------- | ----------- | ------ |
