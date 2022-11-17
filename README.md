@@ -32,6 +32,8 @@ This library is currently a work in progress.
 
 
 ### Implemented API Endpoints (41/146)
+| Status  | Endpoint | Description | Method |
+| ------- | -------- | ----------- | ------ |
 | `[ ]` | `/api/v2/amm/poolsStats` | TBD | GET |
 | `[ ]` | `/api/v2/game/user/rank` | TBD | GET |
 | `[ ]` | `/api/v2/orders/byClientOrderId` | Cancel multiple orders by clientOrderIds | DELETE |
